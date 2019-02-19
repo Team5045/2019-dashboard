@@ -9,21 +9,11 @@
 
 <body>
     <div class="wrapper">
-        <div class="title" id='title'>
-            Match
-        </div>
         <div class="timer" id='timer'>2:15</div>
-        <div class="auto">
-            <select name="chooser" class='auton' id='autoSelect'>
-            </select>                  
-        </div>
-        <div class="graph" id='graph'>
-            <canvas id="myChart"></canvas>                
-        </div>
-        <div class='settings' id='settings'>
-            <select id='pids'></select><button id='clear'>Clear</button>
-            Error: <input type="checkbox" id='error'>
-        </div>
+        <div class="elevator" id="elevator">N/A</div>
+        <div class="wrist" id="wrist">N/A</div>
+        <div class="intake" id="intake">N/A</div>
+        <div class="video" id='graph'></div>
         <div class="tunable">
             <table id="mytable">
                     <thead>
@@ -36,23 +26,13 @@
                         </th>
                 </table>                      
         </div>
-        <div class='gyron' id='gyron'>
-            <svg id="gyro">
-                <circle id='g1' cx="85" cy="85" r="83"></circle>
-                <circle id='g2' cx="85" cy="85" r="50"></circle>
-                <text id="gyro-number" x="90" y="115">0º</text>
-            </svg>    
-        </div>
         <div id="login">
                 <input id="connect-address" type="text" value="localhost" disabled>
                 <button id="connect" disabled>Connecting</button>
-            </div>        
+        </div>        
     </div>
-    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js" type="text/javascript"></script>        
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.bundle.min.js" type="text/javascript"></script>
     <script src="networktables/networktables.js"></script>
     <script src="ui.js"></script>
     <script src="connection.js"></script>
-    <script src="data.js"></script>
 </body>
 </html>

@@ -1,54 +1,72 @@
-var autoSelect = document.getElementById("autoSelect");
 var title = document.getElementById("title");
-var timer = document.getElementById('timer');
-let ui = {
-    gyro: {
-        container: document.getElementById('gyro'),
-        val: 0,
-        offset: 0,
-        visualVal: 0,
-        arm: document.getElementById('gyro-arm'),
-        number: document.getElementById('gyro-number')
-    }
-};
-let updateGyro = (key, value) => {
-    ui.gyro.val = value;
-    ui.gyro.visualVal = Math.floor(ui.gyro.val - ui.gyro.offset);
-    ui.gyro.visualVal %= 360;
-    if (ui.gyro.visualVal < 0) {
-        ui.gyro.visualVal += 360;
-    }
-    ui.gyro.arm.style.transform = `rotate(${ui.gyro.visualVal}deg)`;
-    ui.gyro.number.innerHTML = ui.gyro.visualVal + 'º';
-};
-NetworkTables.addKeyListener('/robot/angle', updateGyro);
+var timer = document.getElementById("timer");
+var elevator = document.getElementById("elevator");
+var wrist = document.getElementById("wrist");
+var intake = document.getElementById("intake");
+var table = document.getElementById("mytable");
 
-// Load list of prewritten autonomous modes
-NetworkTables.addKeyListener('/SmartDashboard/Autonomous Mode/options', (key, value) => {
-    // Clear previous list
-    while (autoSelect.firstChild) {
-        autoSelect.removeChild(autoSelect.firstChild);
+NetworkTables.addGlobalListener(function(key, value, isNew){
+    if (isNew) {
+        var row = table.insertRow();
+        row.id = key;
+        var c0 = row.insertCell(0);
+        var c1 = row.insertCell(1);
+        c0.textContent = key;
+        c1.textContent = value;
+        c1.contentEditable = true;
+        c1.addEventListener('blur', function(){
+            NetworkTables.putValue(c1.parentElement.id,c1.textContent);
+        });
     }
-    // Make an option for each autonomous mode and put it in the selector
-    for (let i = 0; i < value.length; i++) {
-        var option = document.createElement('option');
-        option.appendChild(document.createTextNode(value[i]));
-        autoSelect.appendChild(option);
+    else {
+        var row = document.getElementById(key);
+        row.cells[1].textContent = value;
+        var i = key.split('/').slice(-1).join('/');
     }
-    // Set value to the already-selected mode. If there is none, nothing will happen.
-    autoSelect.value = NetworkTables.getValue('/SmartDashboard/Autonomous Mode/default');
-    NetworkTables.putValue('/SmartDashboard/Autonomous Mode/selected', autoSelect.value);
 });
 
-NetworkTables.addKeyListener('/SmartDashboard/Autonomous Mode/selected', (key, value) => {
-    autoSelect.value = value;
+NetworkTables.addKeyListener("/components/elevator/setpoint", (key, value) => {
+    var setter = "";
+    if(value<101){
+        setter = "GROUND";
+    }
+    else if(value>101 && value<2901){
+        setter = "HATCH 1"
+    }
+    else if(value>2901 && value<12001){
+        setter = "HATCH 2"
+    }
+    else if(value>12001 && value<20001){
+        setter = "HATCH 3"
+    }
+    elevator.innerHTML = setter;
 });
 
-NetworkTables.addKeyListener('/FMSInfo/MatchNumber', (key, value) => {
-    title.innerHTML = 'Match ' + value;
+NetworkTables.addKeyListener("/components/wrist/setpoint", (key, value) => {
+    var setter = "";
+    if(value<101){
+        setter = "RETRACTED";
+    }
+    else if(value>1900){
+        setter = "PLACEMENT";
+    }
+    wrist.innerHTML = setter;
 });
 
-NetworkTables.addKeyListener('/robot/time', (key, value) => {
+NetworkTables.addKeyListener("/LiveWindow/Ungrouped/DoubleSolenoid[0,1]/Value", (key, value) => {
+    var setter = "";
+    if(value=="Reverse"){
+        setter = "CARRYING MODE";
+    }
+    else {
+        setter = "INTAKE MODE";
+    }
+    intake.innerHTML = setter;
+});
+
+
+
+NetworkTables.addKeyListener("/robot/time", (key, value) => {
     if (Math.floor(value%60).toString().length==1) {
         var time = '0' + Math.floor(value%60).toString();
     }
@@ -57,8 +75,4 @@ NetworkTables.addKeyListener('/robot/time', (key, value) => {
     }
     timer.innerHTML = Math.floor(value/60).toString() + ':' + time;
 
-});
-
-autoSelect.addEventListener('change', function(){
-    NetworkTables.putValue('/SmartDashboard/Autonomous Mode/selected', autoSelect.value);
 });
